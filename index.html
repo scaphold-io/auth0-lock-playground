@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Auth0 Lock Test</title>
+</head>
+<!-- Latest minor release -->
+<script src="https://cdn.auth0.com/js/lock/10.0/lock.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.js"></script>
+
+<body>
+	<button id="btn-login">Login</button>
+	<button onclick="verify()">Verify</button>
+	<button onclick="loginScaphold()">Scaphold Login</button>
+	<hr>
+	<div id="nickname">-- No nickname --</div>
+</body>
+
+<script type="text/javascript">
+
+	var lock = new Auth0Lock(
+	  'YOUR-AUTH0-CLIENT-ID', // IMPORTANT: UPDATE THIS AUTH0 CLIENT ID TO YOURS
+	  'YOUR-AUTH0-DOMAIN' // IMPORTANT: UPDATE THIS AUTH0 DOMAIN TO YOURS
+	);
+
+	// Listening for the authenticated event
+	lock.on("authenticated", function(authResult) {
+	  // Use the token in authResult to getProfile() and save it to localStorage
+	  lock.getProfile(authResult.idToken, function(error, profile) {
+	    if (error) {
+	      // Handle error
+	      console.log("ERROR");
+	      console.log(error);
+	      return;
+	    }
+
+	    localStorage.setItem('token', authResult.idToken);
+	    localStorage.setItem('profile', JSON.stringify(profile));
+	  });
+	});
+
+	document.getElementById('btn-login').addEventListener('click', function() {
+	  lock.show();
+	});
+
+	// Display the user's profile
+	function showLoggedIn() {
+	  var profile = JSON.parse(localStorage.getItem('profile'));
+	  document.getElementById('nickname').innerHTML = profile.nickname;
+	}
+
+	function verify() {
+		// Verify that there's a token in localStorage
+		var token = localStorage.getItem('token');
+		if (token) {
+		  showLoggedIn();
+		}
+	}
+
+	function loginScaphold() {
+		/**
+		* Use this snippet with your favorite
+		* JavaScript client frameworks.
+		* Resource: https://api.jquery.com/jquery.post/
+		*/
+
+		console.log(JSON.parse(localStorage.getItem('profile')).identities[0]);
+		console.log(localStorage.getItem('token'));
+
+		var data = {
+		    query: 'mutation Login($data:_LoginUserWithAuth0LockInput!) { loginUserWithAuth0Lock(input: $data) { id_token user { id username credentials } } } ',
+		    variables: JSON.stringify({"data": {"identity": JSON.parse(localStorage.getItem('profile')).identities[0], "token": localStorage.getItem('token')}})
+		};
+
+		$.ajax({
+		    type: "POST",
+		    url: "http://localhost:3000/graphql/80400a55-07e3-445e-a8de-4bbc5f1a53de", // IMPORTANT: UPDATE THIS SCAPHOLD URL TO YOUR GRAPHQL API
+		    data: data,
+		    success: function(result) {
+		        console.log("That was easy!");
+		        console.log(result);
+		        return result;
+		    },
+		    error: function(xhr, ajaxOptions, error) {
+		        console.log("That didn't go so well.");
+		        console.log(error);
+		        return error;
+		    },
+		    dataType: 'json'
+		});
+	}
+
+</script>
+
+</html>
