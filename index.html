@@ -18,8 +18,8 @@
 <script type="text/javascript">
 
 	var lock = new Auth0Lock(
-	  'YOUR-AUTH0-CLIENT-ID', // IMPORTANT: UPDATE THIS AUTH0 CLIENT ID TO YOURS
-	  'YOUR-AUTH0-DOMAIN' // IMPORTANT: UPDATE THIS AUTH0 DOMAIN TO YOURS
+	  'dhCRtTQX5m3a1EuvKNBL1Wm4ST8coIja', // IMPORTANT: UPDATE THIS AUTH0 CLIENT ID TO YOURS
+	  'scapholdclienttest.auth0.com' // IMPORTANT: UPDATE THIS AUTH0 DOMAIN TO YOURS
 	);
 
 	// Listening for the authenticated event
@@ -67,13 +67,13 @@
 		console.log(localStorage.getItem('token'));
 
 		var data = {
-		    query: 'mutation Login($data:_LoginUserWithAuth0LockInput!) { loginUserWithAuth0Lock(input: $data) { id_token user { id username credentials } } } ',
+		    query: 'mutation Login($data: LoginUserWithAuth0LockInput!) { loginUserWithAuth0Lock(input: $data) { token user { id username } } }',
 		    variables: JSON.stringify({"data": {"identity": JSON.parse(localStorage.getItem('profile')).identities[0], "token": localStorage.getItem('token')}})
 		};
 
 		$.ajax({
 		    type: "POST",
-		    url: "http://localhost:3000/graphql/80400a55-07e3-445e-a8de-4bbc5f1a53de", // IMPORTANT: UPDATE THIS SCAPHOLD URL TO YOUR GRAPHQL API
+		    url: "http://localhost:3000/graphql/picayune-lamp", // IMPORTANT: UPDATE THIS SCAPHOLD URL TO YOUR GRAPHQL API
 		    data: data,
 		    success: function(result) {
 		        console.log("That was easy!");
